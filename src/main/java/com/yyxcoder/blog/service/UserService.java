@@ -1,62 +1,90 @@
 package com.yyxcoder.blog.service;
 
+import com.yyxcoder.blog.dto.UserLoginDTO;
 import com.yyxcoder.blog.dto.UserRegisterDTO;
 import com.yyxcoder.blog.dto.UserResponseDTO;
 import com.yyxcoder.blog.entity.User;
 import com.yyxcoder.blog.repository.UserRepository;
-import org.springframework.beans.BeanUtils;
+import com.yyxcoder.blog.util.PasswordUtil;
+import com.yyxcoder.blog.util.SessionUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Service
+@Slf4j//使用log代替System.out.println
 public class UserService {
 
-    private final UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    private final PasswordUtil passwordUtil;
+
+    public UserService(PasswordUtil passwordUtil) {
+        this.passwordUtil = passwordUtil;
     }
 
     /*用户注册*/
     public UserResponseDTO register(UserRegisterDTO registerDTO){
-        System.out.println("=== 开始用户注册 ===");
-        System.out.println("用户名: " + registerDTO.getUsername());
-        System.out.println("邮箱: " + registerDTO.getEmail());
+        log.info("开始注册：username={},email={}",
+                registerDTO.getUsername(),registerDTO.getEmail());
 
-        //1. 检查用户名是否已存在
+        //检查用户名and邮箱是否存在
         if (userRepository.existsByUsername(registerDTO.getUsername())) {
             throw new RuntimeException("用户名已存在");
         }
-
-        //2. 检查邮箱是否已存在
         if (userRepository.existsByEmail(registerDTO.getEmail())) {
             throw new RuntimeException("邮箱已被注册");
         }
 
-        //3. 创建用户实体
+        //创建用户实体
         User user = new User();
         user.setUsername(registerDTO.getUsername());
-        user.setPassword(registerDTO.getPassword()); // 暂时不加密
         user.setEmail(registerDTO.getEmail());
-        user.setCreateTime(LocalDateTime.now());
+        user.setPassword(passwordUtil.encode(registerDTO.getPassword()));//加密密码
 
-        //4. 保存到数据库
+        //保存到数据库
         User savedUser = userRepository.save(user);
-        System.out.println("用户保存成功，ID: " + savedUser.getId());
+        log.info("注册成功：id={},username={}",
+                savedUser.getId(),savedUser.getUsername());
+      //转换为响应DTO
+        return convertToResponseDTO(savedUser);
+    }
+    private UserResponseDTO convertToResponseDTO(User user) {
+        UserResponseDTO dto = new UserResponseDTO();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setCreateTime(user.getCreateTime());
+        return dto;
 
-        // 5. 转换为响应DTO
-        UserResponseDTO responseDTO = new UserResponseDTO();
-        responseDTO.setId(savedUser.getId());
-        responseDTO.setUsername(savedUser.getUsername());
-        responseDTO.setEmail(savedUser.getEmail());
-        responseDTO.setCreateTime(savedUser.getCreateTime());
-
-        return responseDTO;
     }
 
     /*检查用户名是否存在*/
     public boolean checkUsername(String username) {
         return userRepository.existsByUsername(username);
+    }
+
+    /*用户登录*/
+    public UserResponseDTO login(UserLoginDTO loginDTO){
+        log.info("用户尝试登录：username={}", loginDTO.getUsername());
+
+        //根据用户名查找用户
+        User user = userRepository.findByUsername(loginDTO.getUsername())
+                .orElseThrow(()->{
+                    log.warn("登录失败：用户不存在 - {}",
+                            loginDTO.getUsername());
+                    return new RuntimeException("用户名或密码错误");
+                });
+
+        //验证密码
+        if(!passwordUtil.matches(loginDTO.getPassword(),user.getPassword())){
+            log.warn("登录失败：密码错误-{}",
+                    loginDTO.getUsername());
+            throw new RuntimeException("用户名或密码错误");
+        }
+
+        log.info("用户登录成功：id={},user={}",user.getId(),user.getUsername());
+        return convertToResponseDTO(user);
     }
 }

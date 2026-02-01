@@ -1,8 +1,13 @@
 package com.yyxcoder.blog.controller;
 
+import com.yyxcoder.blog.dto.UserLoginDTO;
 import com.yyxcoder.blog.dto.UserRegisterDTO;
 import com.yyxcoder.blog.dto.UserResponseDTO;
 import com.yyxcoder.blog.service.UserService;
+import com.yyxcoder.blog.util.SessionUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -11,18 +16,26 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 public class UserController {
 
+    @Autowired
+    private SessionUtil sessionUtil;
+
     private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
+    /*SpringMVC中处理HTTP请求的注解
+     *@GetMapping:获取资源，处理HTTP GET（查询、获取）
+     *@PostMapping：创建资源，处理HTTP POST（提交、创建）
+     * */
     /*显示注册页面*/
     @GetMapping("/register")
     public String showRegisterPage(Model model) {
         model.addAttribute("userRegisterDTO", new UserRegisterDTO());
         return "register";
     }
+    /*将DTO对象添加到SpringMVC控制器的model中，让前端表单绑定这个对象*/
 
     /*处理注册请求*/
     @PostMapping("/register")
@@ -48,32 +61,44 @@ public class UserController {
         }
     }
 
-    // 在UserController中添加以下方法：
-
     /*显示登录页面*/
     @GetMapping("/login")
-    public String showLoginPage() {
+    public String showLoginPage(Model model) {
+        model.addAttribute("userLoginDTO", new UserLoginDTO());
         return "login";  // 返回 login.html
     }
 
-    /*处理登录请求（简易版，后续完善）*/
+    /*处理登录请求\*/
     @PostMapping("/login")
     public String login(
-            @RequestParam String username,
-            @RequestParam String password,
+            @ModelAttribute UserLoginDTO loginDTO,
+            HttpServletRequest request,
             Model model) {
-
         try {
-            // 这里先简单验证，后续需要连接数据库
-            System.out.println("登录尝试 - 用户名: " + username);
+            //验证登录
+            UserResponseDTO user = userService.login(loginDTO);
 
-            // 模拟登录成功
-            model.addAttribute("message", "登录成功！欢迎 " + username);
+            //设置Session
+            sessionUtil.setUserSession(user);
+
+            //重定向到首页，显示欢迎信息
+            HttpSession session = request.getSession();
+            session.setAttribute("welcomeMessage", "欢迎回来，" + user.getUsername() + "！");
             return "redirect:/";  // 重定向到首页
 
         } catch (Exception e) {
-            model.addAttribute("error", "登录失败: " + e.getMessage());
+            model.addAttribute("userLoginDTO", loginDTO);//保留表单数据
+            model.addAttribute("error", e.getMessage());
+
             return "login";
         }
+    }
+
+    /*用户登出*/
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request) {
+        sessionUtil.logout();
+        request.getSession().invalidate();
+        return "redirect:/";
     }
 }

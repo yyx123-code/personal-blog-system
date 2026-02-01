@@ -19,15 +19,21 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
+        .login-info {
+            background: #e8f4fd;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
-<!-- 用户操作按钮 -->
+<!-- 用户操作按钮 - 简洁版 -->
 <div class="user-actions">
     <!-- 如果已经登录，显示用户名和退出按钮 -->
-    <div th:if="${username}">
-        <span class="me-2">欢迎，<strong th:text="${username}"></strong></span>
-        <a href="/user/logout" class="btn btn-sm btn-outline-danger">退出</a>
+    <div th:if="${username}" class="d-flex align-items-center">
+        <span class="me-3">已登录: <strong th:text="${username}"></strong></span>
+        <a href="/user/logout" class="btn btn-sm btn-outline-danger">退出登录</a>
     </div>
 
     <!-- 如果未登录，显示注册/登录按钮 -->
@@ -40,7 +46,13 @@
 <div class="container">
     <h1>我的博客 - 测试页面</h1>
 
-    <!-- 欢迎消息 -->
+    <!-- 登录状态信息 -->
+    <div th:if="${username}" class="login-info">
+        ✅ 当前已登录用户: <strong th:text="${username}"></strong>
+        <a href="/user/logout" class="btn btn-sm btn-outline-danger ms-3">退出</a>
+    </div>
+
+    <!-- 欢迎消息（登录后显示） -->
     <div th:if="${welcomeMessage}" class="welcome-message">
         <span th:text="${welcomeMessage}"></span>
     </div>
@@ -54,6 +66,8 @@
         <a href="/about" class="btn btn-sm btn-outline-secondary">关于</a>
         <a href="/post/1" class="btn btn-sm btn-outline-success">测试文章1</a>
         <a href="/post/2" class="btn btn-sm btn-outline-success">测试文章2</a>
+        <!-- 如果未登录，显示登录按钮 -->
+        <a th:unless="${username}" href="/user/login" class="btn btn-sm btn-outline-warning">去登录</a>
     </nav>
 
     <hr>

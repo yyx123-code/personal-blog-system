@@ -1,5 +1,12 @@
 package com.yyxcoder.blog.controller;
 
+import com.yyxcoder.blog.dto.UserResponseDTO;
+import com.yyxcoder.blog.service.UserService;
+import com.yyxcoder.blog.util.SessionUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.websocket.SessionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,13 +21,31 @@ import java.util.Map;
 @Controller
 public class BlogController {
 
+    @Autowired
+    private SessionUtil sessionUtil;
+    @Autowired
+    private UserService userService;
+
     // 首页 - 显示文章列表
     @GetMapping("/")
-    public String index(Model model) {
+    public String index(Model model, HttpServletRequest request) {
         System.out.println("=== 访问首页 ===");
 
         // 创建虚拟文章列表
         List<Map<String, Object>> posts = new ArrayList<>();
+
+        if (sessionUtil.isLoggedIn()) {
+            UserResponseDTO user = sessionUtil.getCurrentUser();
+            model.addAttribute("username", user.getUsername());
+            model.addAttribute("userId", user.getId());
+        }
+
+        //获取欢迎消息
+        HttpSession session = (HttpSession) request.getSession();
+        if (session != null && session.getAttribute("welcomeMessage") != null) {
+            model.addAttribute("welcomeMessage", session.getAttribute("welcomeMessage"));
+            session.removeAttribute("welcomeMessage");  // 一次性显示
+        }
 
         // 文章1
         Map<String, Object> post1 = new HashMap<>();

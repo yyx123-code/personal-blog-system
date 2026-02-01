@@ -4,33 +4,96 @@
     <meta charset="UTF-8">
     <title>用户登录</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 400px;
+            margin-top: 50px;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 5px;
+        }
+        .alert-container {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-<div class="container mt-5" style="max-width: 400px;">
-    <h2 class="mb-4">用户登录</h2>
+<div class="container">
+    <h2 class="mb-4 text-center">用户登录</h2>
+
+    <!-- 错误消息 -->
+    <div th:if="${error}" class="alert alert-danger alert-container">
+        <span th:text="${error}"></span>
+    </div>
+
+    <!-- 成功消息（如果有的话） -->
+    <div th:if="${success}" class="alert alert-success alert-container">
+        <span th:text="${success}"></span>
+    </div>
 
     <!-- 登录表单 -->
-    <form action="#" method="post">
+    <form th:action="@{/user/login}" th:object="${userLoginDTO}" method="post">
         <div class="mb-3">
             <label for="username" class="form-label">用户名</label>
-            <input type="text" class="form-control" id="username" name="username" required>
+            <input type="text" class="form-control" id="username"
+                   th:field="*{username}"
+                   th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
+                   placeholder="请输入用户名"
+                   required>
+            <div th:if="${#fields.hasErrors('username')}" class="error-message">
+                <span th:errors="*{username}"></span>
+            </div>
         </div>
 
         <div class="mb-3">
             <label for="password" class="form-label">密码</label>
-            <input type="password" class="form-control" id="password" name="password" required>
+            <input type="password" class="form-control" id="password"
+                   th:field="*{password}"
+                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
+                   placeholder="请输入密码"
+                   required>
+            <div th:if="${#fields.hasErrors('password')}" class="error-message">
+                <span th:errors="*{password}"></span>
+            </div>
         </div>
 
-        <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary">登录</button>
-            <a href="/user/register" class="btn btn-outline-secondary">去注册</a>
-            <a href="/" class="btn btn-link">返回首页</a>
+        <div class="d-grid gap-2 mb-3">
+            <button type="submit" class="btn btn-primary btn-lg">登录</button>
+        </div>
+
+        <div class="text-center">
+            <p class="text-muted">还没有账号？<a href="/user/register">立即注册</a></p>
+            <a href="/" class="btn btn-outline-secondary btn-sm">返回首页</a>
         </div>
     </form>
 
-    <div class="mt-3 text-center">
-        <p>登录功能正在开发中...</p>
+    <!-- 测试账号提示 -->
+    <div class="mt-4 border-top pt-3">
+        <h6 class="text-muted">测试提示：</h6>
+        <ul class="small text-muted">
+            <li>请使用已注册的用户名和密码登录</li>
+            <li>如果还没有账号，请先<a href="/user/register">注册</a></li>
+            <li>登录成功后会自动跳转到首页</li>
+        </ul>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // 自动聚焦到用户名输入框
+    document.addEventListener('DOMContentLoaded', function() {
+        const usernameInput = document.getElementById('username');
+        if (usernameInput) {
+            usernameInput.focus();
+        }
+
+        // 如果有错误消息，自动滚动到错误位置
+        if (document.querySelector('.alert-danger')) {
+            window.scrollTo(0, 0);
+        }
+    });
+</script>
 </body>
 </html>
