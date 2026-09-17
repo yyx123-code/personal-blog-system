@@ -2,6 +2,9 @@ package com.yyxcoder.blog.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -33,19 +36,10 @@ public class Post {
 
     private Integer viewCount = 0;  // 浏览量
 
+    @CreationTimestamp
     private LocalDateTime createTime;
+    @UpdateTimestamp
     private LocalDateTime updateTime;
-
-    @PrePersist                 //插入前的回调函数
-    protected void onCreate() {
-        createTime = LocalDateTime.now();//自动设置创建时间
-        updateTime = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updateTime = LocalDateTime.now();
-    }
 
     public enum Status {
         DRAFT,   // 草稿

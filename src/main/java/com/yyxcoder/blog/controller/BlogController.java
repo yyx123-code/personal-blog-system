@@ -105,13 +105,13 @@ public class BlogController {
         model.addAttribute("comments", comments);
         model.addAttribute("message", "文章详情页加载成功！");
 
-        return "post/detail";  // 对应 templates/post/detail.html
+        return "blog/post/detail";  // 对应 templates/post/detail.html
     }
 
     // 关于页面
     @GetMapping("/about")
     public String about(Model model) {
         model.addAttribute("message", "关于页面");
-        return "about";
+        return "blog/about";
     }
 }

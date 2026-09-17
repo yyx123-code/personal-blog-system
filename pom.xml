@@ -66,6 +66,12 @@
             <version>6.5.7</version>
         </dependency>
 
+        <!--引入jakarta.validation.constraints.NotBlank-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
 	</dependencies>
 
 	<build>

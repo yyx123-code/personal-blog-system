@@ -2,6 +2,9 @@ package com.yyxcoder.blog.entity;//位置声明
 
 import jakarta.persistence.*;   //JPA注解(Java持久化API)
 import lombok.Data;             //Lombok库(自动生成getter/setter)
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDateTime; //时间API
 
 /*JPA注解*/
@@ -37,15 +40,22 @@ public class User {
     /*无注解，默认设置avatar VARCHAR(255) NULL*/
     private String avatar;  // 头像URL
 
-    /*创建时间-TIMESTAMP*/
+    @CreationTimestamp
     private LocalDateTime createTime;
 
-    /*数据插入数据库前的回调函数*/
+    @UpdateTimestamp
+    private LocalDateTime updateTime;
+}
+/*
+    /*创建时间-TIMESTAMP* /
+    private LocalDateTime createTime;
+    /*数据插入数据库前的回调函数* /
     @PrePersist
     protected void onCreate() {
         createTime = LocalDateTime.now();//创建时间
     }
-}
+*/
+
 /*生成的MySQL表:
 CREATE TABLE users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

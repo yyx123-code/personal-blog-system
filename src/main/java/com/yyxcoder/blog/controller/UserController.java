@@ -33,7 +33,7 @@ public class UserController {
     @GetMapping("/register")
     public String showRegisterPage(Model model) {
         model.addAttribute("userRegisterDTO", new UserRegisterDTO());
-        return "register";
+        return "auth/register";
     }
     /*将DTO对象添加到SpringMVC控制器的model中，让前端表单绑定这个对象*/
 
@@ -50,14 +50,14 @@ public class UserController {
             model.addAttribute("userRegisterDTO", registerDTO); // 重要：重新添加DTO
             model.addAttribute("success", "注册成功！用户ID: " + user.getId());
 
-            return "register";  // 返回注册页面显示成功消息
+            return "auth/register";  // 返回注册页面显示成功消息
 
         } catch (Exception e) {
             // 注册失败 - 保留用户输入的数据
             model.addAttribute("userRegisterDTO", registerDTO); // 重要：保留表单数据
             System.out.println("注册失败: " + e.getMessage());
             model.addAttribute("error", "注册失败: " + e.getMessage());
-            return "register";  // 返回注册页面显示错误
+            return "auth/register";  // 返回注册页面显示错误
         }
     }
 
@@ -65,7 +65,7 @@ public class UserController {
     @GetMapping("/login")
     public String showLoginPage(Model model) {
         model.addAttribute("userLoginDTO", new UserLoginDTO());
-        return "login";  // 返回 login.html
+        return "auth/login";  // 返回 login.html
     }
 
     /*处理登录请求\*/
@@ -90,7 +90,7 @@ public class UserController {
             model.addAttribute("userLoginDTO", loginDTO);//保留表单数据
             model.addAttribute("error", e.getMessage());
 
-            return "login";
+            return "auth/login";
         }
     }
 
